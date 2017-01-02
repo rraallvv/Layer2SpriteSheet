@@ -272,16 +272,10 @@ Packer.prototype = {
 				{
 					if (this.params.max_size)
 					{
-						var x = 0;
-
-						if (w > h)
-							x = h < this.params.height ? h : w;
+						if ((w > h && h >= this.params.height) || (w <= h && w < this.params.width))
+							w = Math.min(w * 2, this.params.width);
 						else
-							x = w < this.params.width ? w : h;
-
-						var max = x == w ? this.params.width : this.params.height;
-
-						x = Math.min(x * 2, max);
+							h = Math.min(h * 2, this.params.height);
 					}
 					else
 					{
