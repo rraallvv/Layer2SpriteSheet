@@ -164,6 +164,10 @@ var compJPEGIndex = 3;
 var runButtonID = 1;
 var cancelButtonID = 2;
 
+// namespace and prefix for storing XMP metadata
+var XMPNamespace = "http://ns.texpack/json/1.0/";
+var XMPPrefix = "json:";
+
 ///////////////////////////////////////////////////////////////////////////////
 // Dispatch
 ///////////////////////////////////////////////////////////////////////////////
@@ -1711,15 +1715,15 @@ function packFrames(frames, exportInfo) {
 function addMeta(exportInfo){
     if (ExternalObject.AdobeXMPScript) {
 		var xmp = new XMPMeta(app.activeDocument.xmpMetadata.rawData);
-		var namespace = "http://ns.texpack/json/1.0/";
-		var prefix = "json:";
-		XMPMeta.registerNamespace(namespace, prefix);
 
 		for (var property in exportInfo) {
-			xmp.setProperty(namespace, property, exportInfo[property]);
+			xmp.setProperty(XMPNamespace, property, exportInfo[property]);
 		}
 
 		app.activeDocument.xmpMetadata.rawData = xmp.serialize();
+
+		ExternalObject.AdobeXMPScript.unload();
+		ExternalObject.AdobeXMPScript = undefined;
 	}
 }
 
@@ -1738,11 +1742,12 @@ function getMeta(exportInfo){
     }
 
     if (ExternalObject.AdobeXMPScript) {
+		XMPMeta.registerNamespace(XMPNamespace, XMPPrefix);
+
 		var xmp = new XMPMeta(app.activeDocument.xmpMetadata.rawData);
-		var namespace = "http://ns.texpack/json/1.0/";
 
 		for (var property in exportInfo) {
-			var value = xmp.getProperty(namespace, property);
+			var value = xmp.getProperty(XMPNamespace, property);
 			if (typeof value !== "undefined") {
 				value = value.toString();
 				if (value === "True" || value === "False") {
@@ -1753,9 +1758,6 @@ function getMeta(exportInfo){
 				exportInfo[property] = value;
 			}
 		}
-
-		ExternalObject.AdobeXMPScript.unload();
-		ExternalObject.AdobeXMPScript = undefined;
 	}
 }
 
